@@ -4,21 +4,12 @@ Internet--> inter network of networks
 
 **Main Topics for Networking**
 * LOCAL Networking -Ethernet
-* ROuting 
-* Segenetation, Ports and Sesssion
+* Routing 
+* Segmentation, Ports and Sesssion
 * Application
 
 OSI 7 Layer of Model -- Conceptual How each components works and interact with others
 
-Host Layer --> How data is chopped of and reassembled for transport and formatted so that both the sides can understand the data
-Layer 7 -- Application (Web Browser/ Web server)
-Layer 6 -- Presentation
-Layer 5 -- Session 
-Layer 4 -- Transport
-Media Layer --> How data is moved from point A to Point B
-Layer 3 -- Network 
-Layer 2 -- Data Link
-Layer 1 -- Physical (Network card or interface)
 
 | OSI Model Layers | Description                                                                              |
 | ---------------- | ---------------------------------------------------------------------------------------- |
@@ -136,14 +127,17 @@ Layer 2 can run on different types of **Layer 1 (Ethernet|fibar|wifi|**
     - Packet SRC 1.3.3.7(Home) Destination 52.217.13.37 Default route 0.0.0.0/0 sends all the packets to ISP(Internet service provider)
     - ISP has multiple interface route table is used for selection
     - Based on the Route table of ISP router
+  
 | Destination     | Next Hop/Target |
 |---------------------|---------------------|
 | 52.217.13.0/24       | 52.217.13.1         |
 | 0.0.0.0/0           | 52.43.217.1         |
 | 52.43.215.0/24      | 52.43.215.1         |
+
+
    - Router compares packet destination IP and royte table matching destination. The more specific prefix are preferred(0 lowest, 32 highest). Packet is forwarded on to the next Hop/Target
    - Routing is the process where the packet hop by hop across the internet from source to destination(Mac address of router)
    - ARP(Address resolution Protocol L3 work) protocol will give you the mac address of the given IP address
    - Limitation -- 
-     - No method for channels of comminactions SRC IP <=> DIST IP Only
+     - No method for channels of communcation  SRC IP <=> DIST IP Only
      - IP can be delivered out of order
