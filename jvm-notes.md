@@ -7,6 +7,7 @@ jar -cvf <JARname>,jar *.class
 ```
 
 **Some common error in Java compile**
+
 ```
 <javaname>.java:line: error: package
 <packageName>does not exist
@@ -24,11 +25,11 @@ jar -cvf <JARname>,jar *.class
 Exception stacktrace:
 **Exception stacktrace contains the following information:**
 
-1.Error message
-2.java classes or native code, involved
-3.Code line number of the java(not compiled)code
-Line numbers are of not complied code(source) allowed to track down the code
-execution method flow for troubleshooting
+1. Error message
+
+2. java classes or native code, involved
+
+3. Code line number of the java(not compiled)code Line numbers are of not complied code(source) allowed to track down the code execution method flow for troubleshooting
 
 ## JVM
 * The Java virtual machine is an abstraction computing machine that provides runtime environment to the java code or application.
@@ -41,6 +42,7 @@ core classes, and the supporting java platform libraries, all
 three are required to run java application on your computer
 
 **How to get details of the memory area?**
+
 There are many memory area in JVM, runtime process that are not managed by garbage collection Metaspace, compiler, Memory Tracking, thread stack, etc.
 
 To get the summary of spaces please run the java process with an option
