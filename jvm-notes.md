@@ -6,11 +6,11 @@
 jar -cvf <JARname>,jar *.class
 ```
 
-## Some error in Java complile
-``
+**Some common error in Java compile**
+```
 <javaname>.java:line: error: package
 <packageName>does not exist
-``
+```
 ```
 <JavaName>.java:line: error: cannot find symbol
 <className>"
