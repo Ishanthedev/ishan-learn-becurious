@@ -1,9 +1,11 @@
 
 ## Java notes 
 **Creation of jar**
+
 ```
 jar -cvf <JARname>,jar *.class
 ```
+
 ## Some error in Java complile
 ``
 <javaname>.java:line: error: package
@@ -24,8 +26,8 @@ Exception stacktrace:
 
 1.Error message
 2.java classes or native code, involved
-3.Code line number of the java(uncompiled)code
-Line numbers are of uncomplied code(source) allowed to track down the code
+3.Code line number of the java(not compiled)code
+Line numbers are of not complied code(source) allowed to track down the code
 execution method flow for troubleshooting
 
 ## JVM
@@ -46,6 +48,7 @@ To get the summary of spaces please run the java process with an option
 -XX:nativeMemoryTracking=summary or
 -XX:nativeMemoryTracking=detail to understand the space that are used
 ```
+
 ```
 java -XX:nativeMemoryTracking=summary -cp <classpath> <Entrypoint>
 jcmd <PID> VM.native_memory summary
