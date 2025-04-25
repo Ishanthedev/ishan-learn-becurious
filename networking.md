@@ -135,9 +135,45 @@ Layer 2 can run on different types of **Layer 1 (Ethernet|fibar|wifi|**
 | 52.43.215.0/24      | 52.43.215.1         |
 
 
-   - Router compares packet destination IP and royte table matching destination. The more specific prefix are preferred(0 lowest, 32 highest). Packet is forwarded on to the next Hop/Target
+   - Router compares packet destination IP and route table matching destination. The more specific prefix are preferred(0 lowest, 32 highest). Packet is forwarded on to the next Hop/Target
    - Routing is the process where the packet hop by hop across the internet from source to destination(Mac address of router)
    - ARP(Address resolution Protocol L3 work) protocol will give you the mac address of the given IP address
    - Limitation -- 
-     - No method for channels of communcation  SRC IP <=> DIST IP Only
+     - No method for channels of communication  SRC IP <=> DIST IP Only
      - IP can be delivered out of order
+
+## Layer 4 Transport layer and Layer 5 session layer
+
+Issues with layer 3:
+ 1. Un-ordered packets leaving layer 3.
+ 2. Missing packets in layer 3.
+ 3. Delay in delivery
+ 4. There are no communication channel packets have a source and destination IP but no method of splitting by APP or Channel.
+ 5. No flow control, if the source transmits faster than the destination can receive it can saturate the destination causing the packet loss.
+   
+Note: Every packet is different.
+
+**What is layer 4 and how does it fuction?** 
+
+layer 4 adds protocol:
+1. TCP - Reliability, error correction and ordering of data.
+   1. It is used for most important application layer protocol like HTTP,HTTPS,SSH and so on
+   2. TCP is connection oriented communication channel, once setup it creates a bidirectional channel for communication.
+   3. Slower  
+2. UDP - Less Reliable and faster than TCP.
+
+TCP segments are incapsulated within the IP packets.
+Segment don't have src and destination IP's the packets provide device addressing
+
+**TCP SEGMENT** aka TCP header
+   1. Source port
+   2. Destination port
+   3. sequence number
+   4. Acknowledgement
+   5. Flag 'N' Things 
+   6. Window
+   7. Checksum 
+   8. Urgent pointers
+   9. Options
+   10. Padding
+   11. Data
