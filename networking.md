@@ -254,6 +254,7 @@ That's why you need 2 sets of rules for NETWORK ACL(Access control list within A
 
 
 *How does my laptop private IP address gets its IP*
+
 | Device | IP Type    | Who Assigns It        | Visibility          |
 |--------|------------|----------------------|---------------------|
 | Laptop | Private IP | Router (via DHCP)    | Local network only  |
