@@ -155,7 +155,7 @@ Note: Every packet is different.
 
 **What is layer 4 and how does it fuction?** 
 
-layer 4 adds protocol:
+**yer 4 adds protocol:**
 1. TCP - Reliability, error correction and ordering of data.
    1. It is used for most important application layer protocol like HTTP,HTTPS,SSH and so on
    2. TCP is connection oriented communication channel, once setup it creates a bidirectional channel for communication.
@@ -177,3 +177,88 @@ Segment don't have src and destination IP's the packets provide device addressin
    9. Options
    10. Padding
    11. Data
+
+A TCP segment is the fundamental unit of data transmission in the Transmission Control Protocol (TCP), used for reliable communication between a client and a server over a network.
+
+
+**How segment is used in TCP** /**Architecture of TCP**
+
+TCP is a connection based protocol. A connection is established between two devices using a random port on a client and known port on the server.
+
+Once established the connection is **BI-Directional** The connection is reliable connection, provided via the segment encapsulation in IP packets.
+
+In L3 packets - No Error checking, no ordering no association.
+
+Segment linked to a connection ordering and retransmission.IF packet is lost or unordered the TCP can manage the both the issues.
+Channels are created using segment and they are Bi-directional, one for client to server and another for server to client.
+
+There are 2 kinds of port when used in TCP communication:
+
+1. **Well KNOWN PORT** A server port like TCP 443 for HTTPS.
+2. **Ephemeral Port** A temporary port that a client uses to communicate to the server.Temporary ports that a client picks as the source port when initiating a connection to a server. These ports are dynamically assigned by the operating system from a predefined range and are used for the duration of the sess
+
+It is important to understand that the for layer 4 perspective that the 2 way communication will be from Ephemeral port to well known port and vise versa. 
+One set of rules for laptop to server and another set of rule from server to laptop.
+
+When we mention ephemeral port, it means a port range that a client picks as a source port. These should be allowed back to the client as firewall rules on the server.
+
+That's why you need 2 sets of rules for NETWORK ACL(Access control list within AWS)(State full)
+
+**TCP Connection 3 way handshake** *has 4 steps*
+
+**Step 1** Client sends a **SYN** Send a segment with SYN sequence set 'CS'(ISN) Initial sequence number -- *sequence = cs*.
+**Step 2** Server sends  **SYN-ACK**, picks random ISN sequence 'ss' send segment -**SYN** and **ACK** Acknowledge sets to **CS+1**, I have received up tp CS send CS+1.
+**Step 3** Client send segment with **ACK** send segment with ACK Acknowledge set to **SS+1**, I have received SS, send SS+1 sequence set to CS+1
+**Step 4** The connection is established and the client can send data.
+
+**Session and the state**
+
+ **State less firewall** Network ACL (AWS) has 2 rules one for outbound and another one inbound. As it does not understand the state of TCP connection.
+
+ A **Stateful** firewall views TCP connection as one thing outbound, LAPTOP-IP and TCP 23060 => server IP and TCP port/443 allowing the outbound implicitly allows the inbound response.
+
+ # NAT Network Address Translation
+
+ NAT is fundamental technology used in computer networking to allow multiple devices to share a single PUBLIC IP address. 
+
+ 1. Nat is used to designed to overcome IPv4 Shortages.
+ 2. Private IP address like 10.0.0.0 are used in multiple places and can't be used over internet.
+ 3. To give internet access to private devices we need to use NAT
+ 4. NAT also provides some security benefits too
+ 5. NAT only works for IPV4 and not for IPV6
+ 6. There are many kinds of NAT but they all translate Private IPV4 address to Public:
+    1. **Static Nat** - 1 private to 1 fixed public address (IGW) in both ways.
+       1. From Private zone -- a device Ip(Private) are mapped to 1:1 Public IP in by a static NAT in AWS knows as Internet Gateway
+       2. Packets are generate as normal with a private source (SRC) IP, and an external Destination DST(IP)
+       3. IF a public IP has been allocated to the private IP, the source address of the packet is translates as it passes through the NAT device
+       4. The same process is works in both direction from public to private
+    2. **Dynamic NAT** -1 private to 1st available public
+       1. Public IP allocation are temporary and multiple devices can use the same allocation over time as long as there is no overlap
+       2. If the public IP Pool is exhausted then external access can fail
+       3. Only one Private IP will be mapped to one Public IP address mapping at any time. It is still 1:1 for the duration of the allocation
+    3. **Port address translation (PAT)** many private to 1 public NATGW
+       1. In AWS this is how the NATGatway(NATGW) function - a (Many:1)(Private:PublicIP)Architecture 
+       2. The NAT Device records the source (Private)IP and source Port.
+       3. It replaces the source IPO with single Public IP and Public source port allocated from a pool which allows IP overloading (many to one)
+       4. Return Traffic has tcp/443 and 1.3.3.7 as the source and the public IP of the NAT device adn destination
+       5. Public port and public IP are translated to Private Port and Private IP
+       6. Port address translation PAT maintains a NAT table with following content:
+       Private IP Private Port Public IP Public Port
+
+| NAT Entry | Private IP    | Private Port | Public IP     | Public Port |
+|-----------|--------------|--------------|---------------|-------------|
+| 1         | 10.0.0.100   | 1024         | 155.4.12.1    | 20345       |
+| 2         | 10.0.0.101   | 1056         | 155.4.12.1    | 20346       |
+| 3         | 10.0.0.102   | 1025         | 155.4.12.1    | 20347       |
+| 4         | 10.0.0.103   | 1100         | 155.4.12.1    | 20348       |
+
+
+*How does my laptop private IP address gets its IP*
+| Device | IP Type    | Who Assigns It        | Visibility          |
+|--------|------------|----------------------|---------------------|
+| Laptop | Private IP | Router (via DHCP)    | Local network only  |
+| Router | Public IP  | ISP                  | Visible on internet |
+
+If you want your laptop to be accessible from the internet (for example, to run a server), you would need to configure port forwarding on your router to direct external traffic to your laptop’s private IP address. However, this does not give your laptop a public IP; it simply allows certain types of incoming traffic to reach your laptop through the router
+
+   
