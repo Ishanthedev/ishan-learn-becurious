@@ -217,7 +217,7 @@ That's why you need 2 sets of rules for NETWORK ACL(Access control list within A
 
  A **Stateful** firewall views TCP connection as one thing outbound, LAPTOP-IP and TCP 23060 => server IP and TCP port/443 allowing the outbound implicitly allows the inbound response.
 
- # NAT Network Address Translation
+# NAT Network Address Translation
 
  NAT is fundamental technology used in computer networking to allow multiple devices to share a single PUBLIC IP address. 
 
@@ -253,7 +253,7 @@ That's why you need 2 sets of rules for NETWORK ACL(Access control list within A
 | 4         | 10.0.0.103   | 1100         | 155.4.12.1    | 20348       |
 
 
-*How does my laptop private IP address gets its IP*
+*How does my laptop private IP address gets its public IP*
 
 | Device | IP Type    | Who Assigns It        | Visibility          |
 |--------|------------|----------------------|---------------------|
@@ -262,4 +262,250 @@ That's why you need 2 sets of rules for NETWORK ACL(Access control list within A
 
 If you want your laptop to be accessible from the internet (for example, to run a server), you would need to configure port forwarding on your router to direct external traffic to your laptop’s private IP address. However, this does not give your laptop a public IP; it simply allows certain types of incoming traffic to reach your laptop through the router
 
-   
+## IP Addressing and Subnetting
+
+1. IpV4 standard created in 1981.. RFC791
+2. 0.0.0.0 -> 255.255.255.255 = 4,294,967,296 address 4.294 Billion
+3. IPV 6 is needed because worlds population is over 8 Billion
+4. Origianlly, directed managed by IANA
+5. Internet Assingned Number Authority
+6. All public IPV4 addressing is **allocated**,.. it just can't be picked up and expect to be work on Internet.
+7. Parts of the address space is private and can be used/reused freely
+8. IP address class:
+   1. **Class A:** Given to HUGE organization or big orgs in early days of internet (APPLE, FORD etc)
+      1. Starts with 0.0.0.0 Ends 127.255.255.255 128 Networks 167772163 IPs each 
+      2. 0 (Reserved) 1. 2 ..127
+   2. **Class B:** larger business that don't need class A allocation
+      1. Starts with 128.0.0. and Ends with 191.255.255.255
+      2. 16384 Networks 65536 IPs each
+      3. 128.0,128.1.128.2... until 191.253, 191.254, 191.255
+   3. **Class C** Smaller business *I noticed my IP address to be 192.168.1.193*
+      1. Starts with 192.0.0.0
+      2. 2097152 Network 256 IP Each
+      3. 192.0.1,192.0.2..End with 223.255.255.255
+   4. **Class D** is used for multi cast
+   5. **Class E** reserved
+9. Private IP are defined in standard document RFC1918
+   1.  This doc defined 3 ranges of IP 
+        1.  **10**.0.0.0 -10.255.255.255 (**1 X Class A** network) 16,777,216 IPV6 address
+        2.  **172.16**.0.0 - **172.31**.255.255 (*16 X Class B** Network) 16 x 65,536 IPv4 address
+        3.  **192.168.0**.0 - **192.168.255**.255(**256 X Class C** network) 256 X **256** IP V 4 Address
+
+## IPV4/6 Address space
+
+1. IPV4 internet **4,294,967,296**
+2. IPv6 [**340,282,336,920,938,463,463,370,607,431,770,000,000**](https://www.techtarget.com/whatis/feature/IPv6-addresses-how-many-is-that-in-numbers)
+   1. *Three hundred forty undecillion, two hundred eighty-two decillion, three hundred sixty-six nonillion, nine hundred twenty octillion, nine hundred thirty-eight septillion, four hundred sixty-three sextillion, four hundred sixty-three quintillion, three hundred seventy-four quadrillion, six hundred seven trillion, four hundred thirty-one billion, seven hundred sixty-eight million, two hundred eleven thousand, four hundred fifty-six*
+   2. Meaning 670 Quadrillion per square millimeter of earth
+   3. 50 Octillion per human alive
+   4. 79,228,163,000,000,000,000,000,000,000 IPV4 internets
+
+## IP Subnetting
+1. Cider 
+2. 10.16.0.0/16(prefix)(class A, private class A) the first 2 octet are network and rest is available for hosts for subnetting 
+3. larger the prefix value smaller the network
+4. splitting of 10.16.0.0/16 ---->spiting the network in 2
+   1. /16 => 2 */ 
+      1. 17 10.16.0.0/17
+         1. 10.16.0.0/18
+         2. 10.16.64.0/18
+      2. 10.16.128.0/17--> /17 =>2 */18 2 smaller nets
+         1. 10.16.128.0/18
+         2. 10.16.192.0/18
+5. Network are usually split into 2,4,8 while unusual, odd number splits are valid
+6. Subnetting is the process of taking a larger network and breaking it into more smaller network(higher prefix)
+
+## Distributed Denial of Service attact
+1. Attacks designed to overload website 
+2. Complete against legitimate connection
+3. Distributed hard to block individual Ip/Ranges
+4. Application layer HTTP Flood
+5. Protocol Attack -- **SYN** Flood
+6. Volumetic DNS Amplification attacks
+7. DDos attacks are often inlovs large armies of compromise machines (Botnets)
+
+# Vlans,Trunks and Q in Q
+
+**How we support Vlans in layer 2 OSI model?**
+
+Ethernet frame has following sections:
+
+|Preamble 56 Bits SFD 8 bit | Destination MAC address | Source MAC Address| ET 16 Bits| Payload 46 to 1500 bytes | FCS 32 Bits|
+
+**802.1Q** Changes the frame format by adding a new filed, a 32 bit field in the middle in cyan. Hence the by adding a 32 field between ET and source MAC, the min (64 bytes) and max(1518 bytes) Frame size can be extended to allow for the 4 byte filed.
+
+|Preamble 56 Bits SFD 8 bit | Destination MAC address | Source MAC Address| 802.1Q 32 Bits|ET 16 Bits| Payload 46 to 1500 bytes | FCS 32 Bits|
+
+12 bits of the 802.1Q field allow for the **4096 value**. O is reserve for NO VAL and 1 is often MGMT VLAN.
+
+802.1Q allows multiple "Virtual LANS(Vlans)" to operate over the same L2 physical network. Each has a separate broadcast domain and is isolated from all others.
+
+**802.1AD** |Preamble 56 Bits SFD 8 bit | Destination MAC address | Source MAC Address|802.1Q 32 Bits| 802.1Q 32 Bits|ET 16 Bits| Payload 46 to 1500 bytes | FCS 32 Bits|
+
+Adds an additional VLANS field the 1st is known as S-TAG (Service TAG)....These second C-TAG (Customer TAG).
+QinQ(802.IAD) allows ISP or carrier to use VLAN across their network, while carrying customers traffic which might also be using multiple VLANS
+
+**How .Q works?**
+
+
+1. 802.1Q Switches set ports as either ACCESS port(WHich are generally set to one VLAN ID or TRUNK port)
+2. An access port generally has just one specific VLAN ID.
+3. A trunk generally has all the VLAN ID associated with it
+4. When a frames through an ACCESS port to the switch its VLAN ID added
+5. A Tagged Frame will only be sent to access port with the same VID or over a TRUNK port
+6. Access Port communicate with the station using normal ethernet(No VLAN Tagging)
+7. WHen a TAGGED frame enters an access port, any VID is removed
+8. Devices on different VLANS communicates without a Layer 3 Devices(Router)
+
+
+**Important points for Vlan**
+1. Vlans help in creating a separate L2 network segements
+2. This provides isolation of traffic
+3. If we don't add router then the frames cannot leave the VLAN boundry. 
+4. VLANs are needed to access different networks by AWS Direct Connect VPCs)
+5. Vlans offer separate broadcast domains as they create completely separate virtual network segment
+6. 802.1Q means (VLANS) abd 802.1AD (nested Q in Q VLANS)
+
+## Decimal to Binary conversion
+
+133.33.33.7 ---> Dotted Decimal Notation 32 bit in size
+4 sets of 8 bits binary number --> 10000101.00100001.00100001.00000111
+8 bits is known as byte each byte is also known as OCTETS
+
+Each "Decimal Number" between dots it has a value between 0-255 do each part 1 by 1.
+
+Example of conversion of 133.33.33.7
+133 larger/equal than 128 (rule 2) 133-128 = 5 (new decimal number) add "1" in the binary position.
+5 larger/equal than 4 rule 2 (5-4)=1 new decimal number add "1" in Binary position.
+1 is smaller than 2 rule 1 add 0 and move on
+
+
+
+**Binary Table**
+
+| Position                | 1   | 2  | 3  | 4  | 5 | 6 | 7 | 8 |
+|-------------------------|-----|----|----|----|---|---|---|---|
+| Binary Position Value   | 128 | 64 | 32 | 16 | 8 | 4 | 2 | 1 |
+| Binary Value            | 1   | 0  | 0  | 0  | 0 | 1 | 0 | 1 |
+
+
+
+
+**Rules to follow**
+```
+ 1. Move through the Binary table left to right
+ 2. Compare decimal number to Binary position value, if smaller write 0 => move on to the next table position, goto #1
+ 3. IF it is EQUAL OR LARGER -MINUS the binary position Value from your decimal number and 1 in the binary value column
+ 4. Move on the next position, goto #1 (With the new decimal value)
+ ```
+## Binary to Decimal 
+
+**Binary Table**
+
+| Position                | 1   | 2  | 3  | 4  | 5 | 6 | 7 | 8 |
+|-------------------------|-----|----|----|----|---|---|---|---|
+| Binary Position Value   | 128 | 64 | 32 | 16 | 8 | 4 | 2 | 1 |
+| Binary Value            | 1   | 0  | 0  | 0  | 0 | 1 | 0 | 1 |
+
+ 10000101.00100001.00100001.00000111
+
+ 10000101 = 128+0+0+0+0+4+0+1= 133
+ 00100001 = 0+0+32+0+0+0+0+1 = 33
+ 00100001 = 0+0+32+0+0+0+0+1 = 33
+ 00000111 = 0+0+0+0+0+4+2+1  = 7
+
+ ## SSL and TLS
+ 
+ 1. Provide privacy and data integrity between client and server
+ 2. TLS provides a few Function together with SSL
+ 3. TLS ensures privacy makes sure that communication between server and client is encrypted
+ 4. TLS uses trustless asymmetric trustless encryption(meaning no need to transfer the keys over any medium) where server makes its encryption key public to any client so that the client can encrypt data but only that server can decrypt.
+ 5. TLS moves from assymmetric to symmetric
+ 6. TLS also provides full two way verification for server and client, generally it is the client that is verifying the server
+ 7.  TLS provides reliable connection and protects against alternation of data and TLS can detect alteration of the data
+
+**SSL and TLS stages** *every time you use HTTPS*
+
+**Cipher suites**
+TLS Begins with an established TCP connection, Agree the method of communication the "cipher suits"
+Client says hello to the server, SSL/TLS version, list of supported chipher suites, session ID extensions
+IF the server pics up the the Server says hello and SSL/TLS version, list of supported cipher suites, At this point the client and server have agreed how to communicate and client has the server certificate. The certificate contains the server public keys
+
+**Authentication**
+
+Now clients ensures that server certificate is authentic, verifying the server as legitimate. so the server has certificate (contains, Public ket the DNS name, other organizational information)
+
+Public trusted certificate Authority (CA)- Your OS/Browser trust this
+(past) server generates and a certificate signing request(CSR) the public CA generates a signed certificate.
+
+In authentication stage, the client trusts the public CA it makes sure that the certificate is valid (date and hasn't been revoked) and that the DNS name matches the name/names on the cert
+
+Then the client encrypts the data and sends some random data to server by encrypting the data by private key present in the certificate. 
+
+**Key Exchnages**
+
+The client generates the pre master key, encrypts it with the server public key and sends it to the server.
+
+The server decrypts the pre master key using its private key
+
+Then both the sides uses the same pre master key to generate the master secret which is used to generate the ongoing session keys which encrypts and decrypts data
+
+Now at this point both sides confirms the handshake and from them on communication between client <=> server are encrypted.
+
+# BGP
+Border Gateway Protocol is a routing protocol, which is used to control how data control how data moves from point A to B to C.
+
+BGP is made up by lot of Autonomous System (AS)(Viewed as Black Box) collection or routers controlled by one entity ..a network in BGP.
+
+Each autonomous system is allocated by a number by [IANA](https://www.iana.org/), They are 16 bits in length, ASN are unique and allocated by IANA (0-65535),64512-65534 are private.
+
+BGP operates over TCP/179 its reliable
+
+It is not automatic- peering needs to be done manually configured.
+
+BGP is a path vector protocol it exchanges the best path to a destination between peers.. the path is called the ASPATH.
+
+BGP is not concerned about speed of transfering the data between A to D points, however it is focused on giving the best route from A to D
+
+iBGP = internal BGP - Routing within as Autonomous system
+eBGP = External BGP External BGP - Routing between Autonomous System 
+
+BGP always makes decision based on the path length.
+An AS will advertise all the shortest path it knows to all its peers, the AS prepends its own AS number onto the path, this creates a source to destination path which BGP routers can learn and propagate.
+
+
+BGP is the protocol used for dynamic routing between on-premises networks and AWS VPCs, especially over AWS Direct Connect and Site-to-Site VPNs. 
+Understanding BGP is crucial for designing, implementing, and troubleshooting hybrid architectures-an exam focus area.BGP is designed for large-scale, multi-network environments and is the standard for inter-domain routing on the internet and in enterprise cloud deployments.
+
+It allows you to efficiently manage thousands of routes, which is essential for complex AWS environments and multi-region architectures
+
+AWS Direct Connect and Site-to-Site VPN both rely on BGP for exchanging routing information between AWS and your on-premises infrastructure.BGP is also relevant for Transit Gateway and advanced multi-account, multi-region network designs
+
+# Jumbo frames and how they are supported in AWS
+
+If the payload to the frame is 1500 bytes then it is called a JUMBo frame 
+More payload per frame overhead = more efficient
+More payload per frame = less frames = less waste between frames
+Not everything in AWS supports jumbo frames.
+
+**With in AWS Jumbo frames consideration**
+
+Traffic outside of a single VPC does not support jumbo frames.
+Traffic over an inter-region VPC peering connection 
+Same region peering supports jumbo frames
+Traffic over VPN connection does not support jumbo frames
+Traffic over an internet gateway does not support jumbo frames
+You are able to support jumbo frames over direct connect 
+TGW does support jumbo frames upto 8500 bytes
+
+## Application Layer 7 (firewall)
+
+
+
+
+
+
+
+
+
+
