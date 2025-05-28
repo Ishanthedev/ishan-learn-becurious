@@ -10,6 +10,6 @@ Here are some of my notes:
 
 -[jvm notes](jvm-notes.md)
 
--[hadoop security](jhadoop-security.md)
+-[hadoop security](hadoop-security.md)
 
 -[aws sa pro cert 2025](sa-pro-2025-notes.md)
