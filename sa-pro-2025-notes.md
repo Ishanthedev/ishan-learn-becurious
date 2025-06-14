@@ -41,7 +41,6 @@ After patching, you can verify what was patched, what failed, and what’s missi
 
 2️⃣ Trap: Direct Connect does NOT allow VPC-to-VPC traffic.
  ➡️ It connects on-premises to AWS—NOT VPC-to-VPC. Use Transit Gateway + 
-
  Direct Connect Gateway for multi-VPC routing.
 #  IAM & Security (Cross-Account Access, Policies)
 1️⃣ Trap: Resource-based policies allow cross-account access WITHOUT switching roles.
@@ -52,6 +51,7 @@ After patching, you can verify what was patched, what failed, and what’s missi
 
 # CloudFront & Encryption
 1️⃣ Trap: Field-Level Encryption is needed when encrypting specific sensitive fields (e.g., credit card numbers), not just HTTPS.
+
 2️⃣ Trap: Adding headers (User-Agent, Host) to CloudFront cache key can reduce cache hit ratio, NOT improve it.
 
 # Migration Strategies (6 R’s)
@@ -759,3 +759,96 @@ And for backups:
  CloudFront buys you time, speed, and global scale, immediately.
 “WAF at the edge stops the wedge.”
  Deploy AWS WAF at CloudFront to block exploits right at the edge — before they hit your app.
+
+ **CloudFormation DeletionPolicy Options**
+
+ | DeletionPolicy    | What It Does                                                                                      |
+|-------------------|--------------------------------------------------------------------------------------------------|
+| Delete (default)  | Resource is deleted when the stack is deleted.                                                   |
+| Retain            | Resource remains intact even when the stack is deleted.                                          |
+| Snapshot          | A snapshot backup is created before the resource is deleted (valid for RDS, EBS, ElastiCache, etc.) |
+
+To reach AD with a custom name,
+You forward the query to win the game.
+Conditional rule + endpoint in,
+Now DNS will surely win!”
+
+**Networking Nuggets to Cement in Mind**
+
+| Component            | Function                    | IP / Example                              |
+|----------------------|----------------------------|-------------------------------------------|
+| AmazonProvidedDNS    | VPC-level DNS resolver     | VPC_CIDR + .2 (e.g., 10.0.0.2)            |
+| Route 53 Resolver    | Managed DNS resolver engine<br>Handles internal + external DNS |                                           |
+| Private Hosted Zones | Custom internal domains     | e.g., db.private.tutorialsdojo.com        |
+| Recursive Lookup     | Used for public domains     | e.g., google.com                          |
+
+By default, EC2 instances in a VPC resolve AWS internal hostnames and private zones — no setup needed
+
+If you add a custom DNS domain like AD, you need:
+
+Inbound endpoints
+Conditional forwarders
+
+# Best Practices for Data Transfer to AWS Snowball Edge
+
+## 🚀 Performance Optimization Tips
+
+- **Perform multiple write operations at one time**  
+  Run each command from multiple terminal windows on a computer with a network connection to a single AWS Snowball Edge device.
+
+- **Transfer small files in batches**  
+  Each copy operation incurs overhead due to encryption. To improve speed, batch files together in a single archive. These archives can be auto-extracted when imported into Amazon S3.
+
+- **Write from multiple computers**  
+  A single AWS Snowball Edge device supports connections from multiple computers. Each machine can connect simultaneously to any of the three available network interfaces.
+
+- **Avoid operations on files during transfer**  
+  Refrain from renaming files, changing metadata, or modifying file contents during transfer. These operations negatively affect performance. Files should remain static while being copied.
+
+- **Reduce local network usage**  
+  The AWS Snowball Edge device communicates via the local network. Reduce network traffic between the device, the connected switch, and the source computer to optimize transfer speed.
+
+- **Eliminate unnecessary network hops**  
+  Set up the AWS Snowball Edge device, the data source, and the terminal host to communicate directly over a single switch. Isolating this setup enhances data transfer performance.
+
+🔐 Summary: Burn These in Your Brain
+🧠 What is iSCSI?
+Block storage protocol over IP
+🔧 Where is it used in AWS?
+AWS Storage Gateway (Volume Gateway)
+⚠️ Risks?
+Replay, spoofing, interception, man-in-the-middle (MITM)
+🛡️ Fix?
+Use CHAP auth + TLS encryption
+
+| Gateway Type     | Protocols/Use Case                         | Storage Details                          |
+|------------------|--------------------------------------------|------------------------------------------|
+| File Gateway     | NFS/SMB to S3, files as objects            |                                          |
+| Volume Gateway   | iSCSI, block storage, cached or stored     |                                          |
+| Tape Gateway     | iSCSI, virtual tapes (VTL), backed by S3/Glacier |                                    |
+
+| Volume Mode      | Description                                |
+|------------------|--------------------------------------------|
+| Cached Volumes   | Primary in S3, local cache (cloud-first)   |
+| Stored Volumes   | Primary on-prem, backups to S3 (on-prem-first) |
+
+| Security         | Details                                    |
+|------------------|--------------------------------------------|
+| Volume/Tape
+
+| If the question says...           | Think...                     |
+|-----------------------------------|------------------------------|
+| iSCSI + hybrid storage            | Volume Gateway               |
+| Tape backups / Glacier            | Tape Gateway                 |
+| File shares to S3                 | File Gateway                 |
+| Replay attack                     | Use TLS + CHAP               |
+| Want to reduce tape costs         | Tape Gateway to Glacier      |
+| Need native S3 objects            | File Gateway                 |
+| Local latency for volume          | Volume Gateway with cache    |
+
+| Topic                        | Fact                                                                                   |
+|------------------------------|----------------------------------------------------------------------------------------|
+| ACM Public Certificates      | Free, valid for public domains, auto-renew. Trusted by major browsers.[1][2][3]        |
+| ACM Private CA               | Paid service, used for internal services, not trusted by browsers.[3][4][5]            |
+| Best place to terminate HTTPS| ALB — not EC2 (simpler, more scalable, offloads TLS CPU)                               |
+| HTTPS termination
