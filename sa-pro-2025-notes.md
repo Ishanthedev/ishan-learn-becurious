@@ -120,7 +120,9 @@ SSE-KMS = You manage keys via KMS
 
 💡 Easy phrase:
 🔑 “Config = Compliance. SSM = SysAdmin tasks.”
+
 ✅ When question says:
+
 “User keeps working in their account + no need to switch roles” ➔ ✅ Resource-based policy.
 
 # 🚀  How to Improve Cache Hit Ratio:
@@ -852,3 +854,87 @@ Use CHAP auth + TLS encryption
 | ACM Private CA               | Paid service, used for internal services, not trusted by browsers.[3][4][5]            |
 | Best place to terminate HTTPS| ALB — not EC2 (simpler, more scalable, offloads TLS CPU)                               |
 | HTTPS termination
+
+
+## 🧠 EBS Volume Type Comparison (Burst Behavior)
+
+| EBS Volume Type     | Burstable?          | Default Performance                        | Notes                                       |
+|---------------------|---------------------|---------------------------------------------|---------------------------------------------|
+| **gp2**             | ✅ Yes              | 3 IOPS per GB (burst to 3,000 IOPS)         | Uses burst credit bucket                    |
+| **gp3**             | ❌ No               | 3,000 IOPS + 125 MB/s baseline (adjustable) | Fixed performance                           |
+| **io1 / io2**       | ❌ No               | Provisioned IOPS                            | No burst; guaranteed IOPS                   |
+| **st1 / sc1 (HDD)** | ⚠️ Kind of (linear) | Throughput scales with size                 | Bigger volume = more throughput             |
+
+
+## 📦 gp2 Volume Burst Performance Summary
+
+| Term                   | Meaning                                                                 |
+|------------------------|-------------------------------------------------------------------------|
+| **Baseline IOPS**      | 3 × volume size in GB                                                   |
+| **Burst IOPS**         | Always up to 3,000 IOPS (max for gp2)                                   |
+| **Burst Duration**     | Depends on how many credits are stored                                  |
+| **No burst for > 1 TB**| If gp2 volume > 1,000 GB, it never bursts; it just gets higher baseline IOPS |
+
+## 📦 RDS Engine Support for io1/io2 (Provisioned IOPS EBS)
+
+| Engine        | Supports io1/io2?                        |
+| ------------- | ---------------------------------------- |
+| MySQL         | ✅ Yes                                    |
+| PostgreSQL    | ✅ Yes                                    |
+| Oracle        | ✅ Yes                                    |
+| MS SQL Server | ✅ Yes                                    |
+| MariaDB       | ✅ Yes                                    |
+| Amazon Aurora | ❌ No – Aurora uses its own storage layer |
+
+## 🚪 Types of APIs in Amazon API Gateway
+
+| API Type       | Best For                                 | Pricing Model                      | Example Use Case                        |
+|----------------|-------------------------------------------|------------------------------------|-----------------------------------------|
+| **REST API**   | Full-featured, mature, customizable APIs | Per request, caching, data out     | Legacy apps, complex workflows          |
+| **HTTP API**   | Simpler, faster, cheaper                 | Per request, data out              | Modern serverless APIs, microservices   |
+| **WebSocket**  | Real-time, two-way communication         | Per connection + messages          | Chat apps, real-time dashboards, games  |
+
+# 🔄 What Services Can Receive Requests from an Application Load Balancer (ALB)?
+
+Here’s the short, exam-focused and real-world-relevant list:
+
+| **Target Type**       | **Description**                                                                 |
+|------------------------|---------------------------------------------------------------------------------|
+| **EC2 Instances**      | Most common. ALB routes traffic to one or more EC2 instances.                   |
+| **Lambda Functions**   | Serverless target. ALB forwards HTTP(S) request → invokes Lambda → returns response. |
+| **IP Addresses**       | IPs in your VPC subnet only (e.g., ECS tasks with awsvpc networking).           |
+| **ECS Services**       | ECS tasks (behind EC2 or Fargate) — registered via target groups.               |
+| **ALB (via NLB)**      | Not direct — but an NLB can forward to an ALB (rare case for PrivateLink use). |
+
+## 🧠 Bonus: What **ALB Cannot** Send Traffic To:
+
+| ❌ Not Allowed                        | 💡 Reason                                  |
+|-------------------------------------|--------------------------------------------|
+| Arbitrary external IPs              | Use NLB instead                            |
+| RDS or DynamoDB directly            | These aren't valid ALB targets             |
+| On-prem IPs                         | Not unless routed through VPN + NLB        |
+| S3 static websites                  | S3 isn't an ALB target                     
+
+# ✅ Gateway Load Balancer – Final Answers Review
+
+| ❓ Question                                      | ✅ Correct Answer                        | 💡 Why It Matters                                                                 |
+|-------------------------------------------------|------------------------------------------|-----------------------------------------------------------------------------------|
+| What layer does GWLB operate on?                | ✅ L3 (Network Layer)                     | It forwards IP traffic, not HTTP or TCP sessions. Think "raw packets" — Layer 3. |
+| What does GWLB forward traffic to?              | ✅ Security appliances (usually EC2)      | These are like firewalls, IDS/IPS, malware scanners — not general EC2 apps.      |
+| What protocol does it use under the hood?       | ❌ Correction: ✅ GENEVE (not UTP)         | GENEVE = Generic Network Virtualization Encapsulation. Adds metadata to traffic. |
+| What use cases are highlighted?                 | ✅ Traffic inspection, firewalling, threat detection | 🔐 Pro-level use cases: inline deep packet inspection, centralized firewalling, appliance chaining. |
+| How is it used across accounts or VPCs?         | ✅ Via VPC Endpoint Services (PrivateLink) | GWLB can be shared with other accounts securely using PrivateLink.                |
+
+## 🔐 Gateway Load Balancer – 5-Tuple Flow Stickiness
+
+To maintain **flow stickiness** (so that packets in the same session go to the same appliance),  
+Gateway Load Balancer uses a **5-tuple** identifier:
+
+- **Source IP**
+- **Source Port**
+- **Destination IP**
+- **Destination Port**
+- **Protocol**
+
+🧠 This ensures that all packets from the same connection are forwarded to the same target (e.g., a firewall),  
+even though **GWLB itself does not maintain application state**.
