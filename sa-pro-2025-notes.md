@@ -938,3 +938,247 @@ Gateway Load Balancer uses a **5-tuple** identifier:
 
 🧠 This ensures that all packets from the same connection are forwarded to the same target (e.g., a firewall),  
 even though **GWLB itself does not maintain application state**.
+
+## Aurora
+
+At performance bottlenecks, zero downtime scaling, multi-AZ durability, or global DR with MySQL apps, your brain should yell: Aurora MySQL.
+
+Aurora has drop-in compatibility for two major engines:
+Aurora MySQL → Drop-in compatible with MySQL (what we just discussed).
+
+
+Aurora PostgreSQL → Drop-in compatible with PostgreSQL.
+Aurora Standard → Charged for read and write I/O operations + storage.
+
+Aurora I/O-Optimized → No charge for read and write I/O operations, only pay for storage + compute
+
+# Scaling Compute in Amazon Aurora – 3 Options
+
+## 1. Aurora Serverless *(v2 is common in new questions)*
+- **Auto-scales** compute capacity **up and down** based on workload.
+- Best for **infrequent, unpredictable, or variable workloads**.
+- Pay **per second** for the capacity used.
+- **No manual intervention** — scaling is automatic.
+- **Exam Trigger:**  
+  > "Sporadic traffic" or "must scale without manual changes" → **Aurora Serverless**.
+
+## 2. Aurora PostgreSQL Limitless Database *(PostgreSQL only)*
+- **Horizontally scales** compute and storage **beyond a single cluster**.
+- Designed for **massive scale** — handles **millions of writes/second** and **petabytes of data**.
+- Built for **highly concurrent OLTP workloads**.
+- **Exam Trigger:**  
+  > "Very high transaction rates" or "multi-writer scaling" with PostgreSQL → **Aurora Limitless**.
+
+## 3. Manual Scaling
+- Manually change **DB instance class** (upsize/downsize).
+- **Requires reboot** for most instance class changes.
+- Good for **predictable workloads** where you know resource needs.
+- **Exam Trigger:**  
+  > "Predictable growth" or "fixed monthly workload" → **Manual scaling**.
+
+## Common Exam Pattern
+- **Unpredictable load + cost efficiency** → Aurora Serverless  
+- **Extreme scale OLTP + PostgreSQL** → Aur
+
+# CloudFront – File Expiration at Edge Locations
+
+## Default Behavior
+- **No Cache-Control header** → Edge checks origin **every 24 hours** for changes.
+
+## Custom Expiration
+- Set **Cache-Control headers** at origin to control expiration.
+- Can set **as short as 0 seconds** or **as long as desired**.
+
+## Special Cases
+- **0 seconds** → CloudFront revalidates **every request** with origin.
+- **Long expiration** → Best for files that **rarely change**.
+  - Combine with **versioned file names** for updates (e.g., `file_v2.css`).
+
+## Exam Pattern Triggers
+- **No header given** → 24-hour check.
+- **Frequent updates** → Short TTL or 0 seconds.
+- **Rare updates** → Long TTL + versioning (performance & cost optimization).
+
+If the scenario talks about caching POST/PUT responses in CloudFront → Not supported (must always go to origin).
+If they talk about OPTIONS → Caching is possible.
+
+# CloudFront – HTTP Version Comparison
+
+## Supported Versions
+When configuring a CloudFront distribution, you can select:
+- **HTTP/2**
+- **HTTP/1.1**
+- **HTTP/1.0**
+- *(HTTP/3 is emerging and supported in some AWS services with CloudFront)*
+
+## 1. HTTP/1.0
+- **Year:** 1996
+- **Features:** Basic requests, no persistent connections.
+- **Use with CloudFront:**  
+  - Rarely used today, mostly for legacy clients that cannot use newer protocols.
+  - Higher latency for multiple file loads.
+- **When to choose:** Only if you must support very old browsers or systems.
+
+## 2. HTTP/1.1
+- **Year:** 1997
+- **Features:** Persistent connections (keep-alive), pipelining, better caching controls.
+- **Use with CloudFront:**  
+  - Widely supported.
+  - Still processes requests mostly sequentially.
+- **When to choose:** Safe fallback for clients that don’t support HTTP/2.
+
+## 3. HTTP/2
+- **Year:** 2015
+- **Features:** Multiplexing (multiple requests over a single connection), binary format, header compression.
+- **Use with CloudFront:**  
+  - Default for new distributions.
+  - Reduces latency, improves page load speed.
+  - Best for modern browsers and high-traffic sites.
+- **When to choose:** Almost always, unless you have a specific legacy requirement.
+
+## 4. HTTP/3 *(QUIC-based)*
+- **Year:** Emerging (2018+)
+- **Features:** Uses QUIC over UDP for faster and more reliable connections, especially on lossy networks.
+- **Use with CloudFront:**  
+  - Great for mobile users, high-latency, or packet-loss environments.
+  - Improves performance for real-time apps, streaming, gaming.
+- **When to choose:** If your audience is mobile-heavy or experiences unstable connections (and their browsers support HTTP/3).
+
+## CloudFront Best Practice
+- **Primary:** HTTP/2 (broad support + speed benefits).
+- **Fallback:** HTTP/1.1 for older clients.
+- **Consider HTTP/3:** For performance gains in mobile/unstable networks.
+
+# CloudFront SaaS Manager – AWS Pro Exam Notes
+
+## What It Is
+- A CloudFront feature for **managing multiple websites at scale**.
+- Ideal for:
+  - **SaaS providers** with many tenant websites.
+  - **Web development platforms** hosting multiple customer sites.
+  - **Large enterprises** with many corporate websites.
+
+# CloudFront SaaS Manager – AWS Pro Exam Notes
+
+## What It Is
+- A CloudFront feature for **managing multiple websites at scale**.
+- Ideal for:
+  - **SaaS providers** with many tenant websites.
+  - **Web development platforms** hosting multiple customer sites.
+  - **Large enterprises** with many corporate websites.
+
+## When to Use
+- **Many websites** (hundreds/thousands).
+- **Multi-tenant SaaS** architecture.
+- Need for **standardization + flexibility**.
+
+## When NOT to Use
+- Only a **handful of websites**.
+- Each site has **different CloudFront configurations**.
+- In these cases → Use **traditional single-tenant (individual) distributions**.
+
+## Exam Triggers
+- Keywords: **"multi-tenant"**, **"SaaS"**, **"standardize settings"**, **"many websites"** → **CloudFront SaaS Manager**.
+- Keywords: **"few sites"**, **"different configs"** → **Single/distribution per site**.
+
+"Apex = naked domain → needs ALIAS in Route 53, not CNAME, for CloudFront."
+
+# CloudFront – Field-Level Encryption (FLE)
+
+## What It Is
+- A CloudFront feature to **secure specific sensitive fields** in user-submitted data **before** sending it to the origin.
+- Example: Encrypting **credit card numbers**, **SSNs**, or other sensitive form inputs.
+
+## How It Works
+1. **User submits data** (e.g., via HTTPS form with multiple fields).
+2. CloudFront uses **field-specific encryption keys** (supplied by you) to **encrypt only selected fields** (e.g., credit card number).
+3. The encrypted data is forwarded via **PUT** or **POST** requests to the origin.
+4. Only **authorized components/services** with the correct private key can decrypt these fields.
+
+## Benefits
+- **Extra security layer** on top of HTTPS.
+- Minimizes exposure of sensitive data.
+- Helps meet **compliance** requirements (e.g., PCI DSS for credit cards).
+
+## Exam Triggers
+- Keywords: **"encrypt only certain form fields"**, **"sensitive user data"**, **"before reaching origin"**.
+- Correct answer: **CloudFront Field-Level Encryption**.
+- Distinguish from:
+  - **Full HTTPS** → encrypts entire request in transit.
+  - **Server-side encryption (S3, RDS, etc.)** → encrypts data at rest.
+
+# CloudFront – DDoS Protection
+
+## Default Protection
+- **AWS Shield Standard** (free, enabled by default).
+- Protects against common L3/L4 attacks:
+  - SYN/UDP Floods
+  - Reflection attacks
+  - Other frequent infrastructure-level DDoS
+- Helps maintain high availability.
+
+## Advanced Protection
+- **AWS Shield Advanced** (paid, for Business & Enterprise Support).
+- Extra protection against **large, sophisticated attacks**.
+- Covers:
+  - ELB
+  - CloudFront
+  - Route 53
+- Adds:
+  - Cost protection (DDoS-related scaling charges)
+  - Real-time attack visibility
+  - 24/7 DDoS response team.
+
+## Exam Trigger
+- **"Common infra attacks" + free** → Shield Standard.
+- **"Large/sophisticated attacks" or cost protection** → Shield Advanced.
+
+# CloudFront + AWS WAF – Web App Protection
+## Purpose
+- Protects CloudFront-delivered web apps from **application-layer attacks** (Layer 7).
+- Lets you create **custom rules** to allow, block, or monitor requests.
+
+## How It Works
+1. Attach **AWS WAF** to your CloudFront distribution.
+2. Define rules based on:
+   - **IP addresses** (e.g., block IP ranges from certain countries)
+   - **HTTP headers** (e.g., block requests missing User-Agent)
+   - **URI strings** (e.g., block `/admin` from public access)
+3. WAF processes each incoming request **before** it reaches your origin.
+
+## Example
+- **Scenario:** Your site gets bot traffic on `/login` trying password guessing.
+- **Solution:**  
+  - Attach WAF to CloudFront.
+  - Add rule: Block requests to `/login` with >10 failed attempts in 5 min from same IP.
+  - Result: Malicious requests never hit your origin.
+
+## Exam Trigger
+- Keywords: **"block requests based on IP/headers/URI"**, **"filter before reaching origin"**.
+- Correct choice: **AWS WAF with CloudFront**.
+
+# AWS Application Discovery & Migration Assessment – Exam Table
+
+| Tool/Service                          | When to Use                                                    | Data Collected / Focus                                    | Data Usable In                                 | Agent?     |
+|---------------------------------------|----------------------------------------------------------------|------------------------------------------------------------|-----------------------------------------------|------------|
+| **Application Discovery Service – Agentless Collector** | - VMware config, performance, network connection info<br>- Database discovery | High-level server, VM, and DB configuration/performance   | Migration Hub, AWS DMS Fleet Advisor          | No agent   |
+| **Application Discovery Service – Discovery Agent**     | - Process-level dependency mapping (which apps talk to which) | Deep process-level dependency and activity data            | Migration Hub, Amazon Athena                  | Yes agent  |
+| **Migration Evaluator**               | - Guided migration assessment<br>- Agentless server dependency mapping | Cross-platform workloads: VMware, Hyper-V, SQL Server, Windows, Linux | Migration Hub, Migration Evaluator            | No agent (uses agentless collector) |
+
+
+## Exam Triggers
+- **"VMware/network/db info" + no install** → Agentless Collector  
+- **"Process-level dependencies"** → Discovery Agent  
+- **"Guided assessment + multi-platform mapping"** → Migration Evaluator  
+
+Need migration data → Which type?
+
+1️⃣ VMware / network / DB info (no installs)?  
+   → ✅ Agentless Collector
+
+2️⃣ Deep process-level dependencies?  
+   → ✅ Discovery Agent
+
+3️⃣ Want AWS expert + guided assessment + multi-platform mapping?  
+   → ✅ Migration Evaluator
+
