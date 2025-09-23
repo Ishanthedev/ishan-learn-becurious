@@ -2082,6 +2082,28 @@ Mnemonic:
 | Sequential (logs, streaming data)   | st1          |
 | Infrequent/archival/cold            | sc1          |
 
+
+# EBS Volume Types — Nuances & Use Cases
+
+| **Type** | **Performance Metric** | **Best Use Cases** | **Nuances** | **Exam Traps** |
+|----------|-------------------------|--------------------|-------------|----------------|
+| **gp2 (General Purpose SSD)** | IOPS/GB (3 IOPS/GB, up to 16,000 IOPS) | Boot volumes, dev/test DBs, general workloads | Older default; performance tied to size (small volumes = lower baseline) | Don’t pick gp2 if question mentions **predictable IOPS regardless of size** → gp3 |
+| **gp3 (General Purpose SSD)** | Baseline: 3,000 IOPS, 125 MB/s throughput; scalable up to 16,000 IOPS / 1,000 MB/s independently of size | Modern default: boot, app servers, small-to-medium DBs, EMR clusters | Cheaper than gp2, predictable baseline even for small disks | If Q says “cost-effective, predictable IOPS” → gp3 (not gp2) |
+| **io1 (Provisioned IOPS SSD)** | Provision up to 64,000 IOPS (Nitro instances) | Mission-critical DBs (Oracle, SAP, SQL Server, DynamoDB on EC2) | You pay for provisioned IOPS; can also enable Multi-Attach | Wrong if cost-efficiency or throughput is the priority |
+| **io2 (Provisioned IOPS SSD, Gen2)** | Same as io1 but 99.999% durability, up to 500 IOPS/GB | Enterprise-grade, latency-sensitive, Tier-1 OLTP DBs | Higher durability SLA; fewer failures | Wrong if question only needs io1 durability |
+| **st1 (Throughput Optimized HDD)** | Throughput (MB/s), up to 500 MB/s per volume | Big data, data warehouse, ETL, log processing — **frequently accessed, sequential workloads** | Cheaper than SSD, best for **streaming throughput** | Not for boot, random access, or infrequent workloads |
+| **sc1 (Cold HDD)** | Throughput (MB/s), up to 250 MB/s per volume | Archival data, cold storage, infrequently accessed | Lowest-cost EBS; designed for “rarely read” | If data is accessed often, sc1 will bottleneck → pick st1 instead |
+
+# EBS Mnemonics & Exam Shortcuts
+
+| **Mnemonic** | **Meaning** | **Exam Shortcut** |
+|--------------|-------------|--------------------|
+| **GP** | General apps (gp2/gp3) | gp2 vs gp3 → gp3 is modern default (cheaper, predictable baseline, independent scaling). gp2 is legacy. |
+| **IO** | IOPS-hungry DBs (io1/io2) | io1 vs io2 → both for high IOPS DBs; io2 = higher durability, SLA, newer gen. |
+| **ST** | Streaming workloads (frequent) | st1 vs sc1 → both are HDD, throughput-focused; st1 = frequent big data, sc1 = infrequent cold. |
+| **SC** | Cold, infrequent workloads | sc1 for archival/infrequent, lowest cost option. |
+
+
 # Aurora
 
 When performance bottlenecks, zero-downtime scaling, multi-AZ durability, or global DR with MySQL apps are mentioned, think **Aurora MySQL**.
