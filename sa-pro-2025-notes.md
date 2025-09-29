@@ -1619,7 +1619,35 @@ Requirement: DR for MySQL DB, RPO = 10 min, RTO = 5 min
    - Cluster mode enabled:  
      - Online resharding → add/remove shards, vertical scaling  
      - Offline resharding → add/remove shard, change node type, upgrade engine (more flexible)  
+# AWS ElastiCache – SA Pro Exam Cheatsheet
 
+| Feature / Use Case | Memcached | Redis 2.8 | Redis 3.2 (Cluster Mode) |
+|---------------------|-----------|-----------|---------------------------|
+| **Persistence** | ❌ No | ✅ RDB / AOF persistence | ✅ Same as 2.8 |
+| **Replication / HA** | ❌ None | ✅ Master–Replica (multi-AZ) | ✅ Sharded + replicas |
+| **Sharding / Partitioning** | ✅ Client-side sharding | ❌ Single shard | ✅ Native cluster sharding |
+| **Data Types** | Simple: strings only | Rich: strings, lists, sets, sorted sets, hashes | Same + better scalability |
+| **Pub/Sub Messaging** | ❌ No | ✅ Yes | ✅ Yes |
+| **Transactions / LUA Scripts** | ❌ No | ✅ Yes | ✅ Yes |
+| **Use Case Keywords** | - Simple caching<br>- Horizontal scale<br>- Low complexity | - Advanced data structures<br>- Leaderboards, queues, counters<br>- Analytics requiring atomic ops | - Very large datasets<br>- Horizontal scale-out with clustering |
+| **Scalability** | Scale-out by adding nodes (no replicas) | Vertical scale + replicas (limited by single shard) | Horizontal scale across shards (100s of GB/TB) |
+| **When to Pick (Exam)** | “Simple, multi-threaded, scale-out cache” | “Need persistence, HA, data types, pub/sub, atomic ops” | “Massive dataset, need sharding + HA, scalable Redis” |
+
+Memory Hooks
+
+Memcached = Simple + Scale-out. (Think: “just caching web pages”)
+
+Redis 2.8 = Rich features, HA, persistence. (Think: “leaderboards, queues, counters”)
+
+Redis 3.2 (Cluster Mode) = Redis at scale. (Think: “big data + sharding”)
+
+✅ Exam Shortcut:
+
+“Simple cache, no persistence” → Memcached
+
+“Need HA, persistence, data structures” → Redis 2.8
+
+“Massive scale, cluster/sharding” → Redis 3.2
 ---
 
 ## Amazon DynamoDB Core Knowledge
@@ -1765,6 +1793,26 @@ Requirement: DR for MySQL DB, RPO = 10 min, RTO = 5 min
    - Use AWS X-Ray to trace and debug the application  
 
 # Security 
+
+# AWS Directory Services – SA Pro Exam Cheatsheet
+
+| Service        | What It Is | Key Features | Limitations / Triggers |
+|----------------|------------|--------------|-------------------------|
+| **AD Connector** | Proxy/federation to your **existing on-prem AD** | - No directory in AWS, just connects back<br>- Users log in with **existing corporate creds**<br>- Enforces existing AD security policies (PW expiry, lockouts)<br>- Supports MFA (can integrate with RADIUS)<br>- No caching of info in AWS<br>- Comes in 2 sizes: Small (≤500 users), Large (≤5000) | - **If network link fails → no AD**<br>- Only works if on-prem AD already exists |
+| **Simple AD** | Lightweight managed directory (**Samba 4**) | - Good for **new, small AD deployments**<br>- Domain-join EC2<br>- Kerberos-based SSO<br>- 2 DCs (across 2 AZs)<br>- Comes in Small (≤500 users), Large (≤5000) | - **No MFA**<br>- **No trusts** with other domains<br>- **No FSMO role transfer**<br>- **No schema extensions**<br>- **No LDAP-S** |
+| **AWS Managed Microsoft AD** | Full **Windows Server AD** managed by AWS | - Built on Windows Server 2012 R2<br>- Supports up to 50k users (200k objects)<br>- Multi-AZ deployment, auto-failover, daily backups<br>- Can **create trust relationships** (AWS ↔ On-prem AD)<br>- Run directory-aware Windows workloads<br>- AWS patches & manages infra | - More expensive<br>- Overkill for small/simple deployments |
+
+# AWS CloudTrail – SA Pro Exam Patterns
+
+| Exam Scenario | Correct Answer Pattern |
+|---------------|-------------------------|
+| “Log across all regions automatically” | **Multi-region trail** |
+| “Track activity across many AWS accounts, central location” | **Aggregate trails into one account’s S3 bucket** |
+| “Monitor IAM or CloudFront activity” | **Check global events in us-east-1** |
+| “Capture S3 object-level API calls” | **Enable Data Events for S3** |
+| “Detect unusual activity automatically” | **CloudTrail Insights** |
+| “Ensure CloudTrail logs can’t be deleted” | **Enable S3 bucket policy with write-only access + enable CloudTrail log file validation** |
+
 
 ## AWS CloudHSM
 
@@ -2588,3 +2636,11 @@ Mnemonic:
 - *“CloudFront FLE = encrypt just fields”*  
 - *“WAF at edge stops the wedge”*  
 
+# AWS SA Pro – Key Ports for Hybrid/Networking Scenarios
+
+| Port  | Protocol | Usage Context                          | Importance / Exam Triggers |
+|-------|----------|----------------------------------------|-----------------------------|
+| 443   | HTTPS    | External communication to AWS services | Required for secure communication between on-prem appliances (e.g., Storage Gateway) and AWS. Without 443, gateway can’t connect. |
+| 80    | HTTP     | Activation/initial setup only          | Needed only during appliance activation. Afterward, traffic switches to 443. Exam clue: “Gateway not activating.” |
+| 3260  | iSCSI    | Block storage connectivity (internal)  | Used by Storage Gateway (Volume Gateway) to present block storage. If blocked, on-prem servers can’t mount volumes. |
+| UDP 53| DNS      | DNS resolution (internal)              | Required for appliances to resolve AWS endpoints. If blocked, hybrid services can’t reach AWS APIs. Exam clue: “DNS resolution failure.” |
